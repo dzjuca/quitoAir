@@ -6,10 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Daniel">
-<meta name="dcterms.date" content="2026-04-23">
+<meta name="author" content="Daniel Z. Juca">
+<meta name="dcterms.date" content="2026-04-24">
 
-<title>Calidad del Aire en Quito</title>
+<title>Limpieza y Preparación de Datos – Calidad del Aire en Quito</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -156,11 +156,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#contexto-del-problema" id="toc-contexto-del-problema" class="nav-link active" data-scroll-target="#contexto-del-problema">Contexto del problema</a></li>
-  <li><a href="#motivación" id="toc-motivación" class="nav-link" data-scroll-target="#motivación">Motivación</a></li>
-  <li><a href="#preguntas-analíticas" id="toc-preguntas-analíticas" class="nav-link" data-scroll-target="#preguntas-analíticas">Preguntas analíticas</a></li>
-  <li><a href="#dataset" id="toc-dataset" class="nav-link" data-scroll-target="#dataset">Dataset</a></li>
-  <li><a href="#estructura-del-proyecto" id="toc-estructura-del-proyecto" class="nav-link" data-scroll-target="#estructura-del-proyecto">Estructura del proyecto</a></li>
+  <li><a href="#fuente-de-datos" id="toc-fuente-de-datos" class="nav-link active" data-scroll-target="#fuente-de-datos">Fuente de datos</a></li>
+  <li><a href="#carga-y-estructura-inicial" id="toc-carga-y-estructura-inicial" class="nav-link" data-scroll-target="#carga-y-estructura-inicial">Carga y estructura inicial</a></li>
+  <li><a href="#exploración-inicial" id="toc-exploración-inicial" class="nav-link" data-scroll-target="#exploración-inicial">Exploración inicial</a></li>
+  <li><a href="#limpieza-y-transformaciones" id="toc-limpieza-y-transformaciones" class="nav-link" data-scroll-target="#limpieza-y-transformaciones">Limpieza y transformaciones</a></li>
+  <li><a href="#dataset-final" id="toc-dataset-final" class="nav-link" data-scroll-target="#dataset-final">Dataset final</a></li>
   </ul>
 </nav>
     </div>
@@ -169,8 +169,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Calidad del Aire en Quito</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
-<p class="subtitle lead">Análisis histórico de la Red Metropolitana de Monitoreo Atmosférico (REMMAQ) 2004–2026</p>
+<div class="quarto-title-block"><div><h1 class="title">Limpieza y Preparación de Datos</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
 </div>
 
 
@@ -180,14 +179,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Daniel </p>
+             <p>Daniel Z. Juca </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 23, 2026</p>
+      <p class="date">April 24, 2026</p>
     </div>
   </div>
   
@@ -199,38 +198,182 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="contexto-del-problema" class="level2">
-<h2 class="anchored" data-anchor-id="contexto-del-problema">Contexto del problema</h2>
-<p>Quito, capital del Ecuador, enfrenta desafíos significativos en materia de calidad del aire debido a su crecimiento urbano, el incremento del parque automotor y su particular topografía andina. La Red Metropolitana de Monitoreo Atmosférico (REMMAQ) registra desde 2004 datos horarios de contaminantes y variables meteorológicas en múltiples estaciones distribuidas a lo largo de la ciudad.</p>
+<section id="fuente-de-datos" class="level2">
+<h2 class="anchored" data-anchor-id="fuente-de-datos">Fuente de datos</h2>
+<p>Se trabajó con 14 archivos Excel descargados de la REMMAQ — uno por variable —, cada uno con una fila de unidades que fue omitida en la carga y una columna por estación de monitoreo.</p>
 </section>
-<section id="motivación" class="level2">
-<h2 class="anchored" data-anchor-id="motivación">Motivación</h2>
-<p>Comprender cómo ha evolucionado la calidad del aire en Quito durante más de dos décadas permite identificar tendencias, zonas críticas y la relación entre factores ambientales y niveles de contaminación — información clave para la toma de decisiones en salud pública y política ambiental.</p>
+<section id="carga-y-estructura-inicial" class="level2">
+<h2 class="anchored" data-anchor-id="carga-y-estructura-inicial">Carga y estructura inicial</h2>
+<p>Cada archivo contiene una columna de fecha/hora y una columna por estación de monitoreo. Para facilitar el análisis, los 14 archivos se transformaron a formato <strong>tidy</strong> (largo): cada fila representa una observación única de una variable, en una estación y un momento determinado.</p>
+<p>Por ejemplo, en lugar de tener una columna por estación:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>datetime</th>
+<th>Belisario</th>
+<th>Carapungo</th>
+<th>Cotocollao</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2004-01-01 01:00</td>
+<td>12.3</td>
+<td>8.7</td>
+<td>15.1</td>
+</tr>
+<tr class="even">
+<td>2004-01-01 02:00</td>
+<td>11.8</td>
+<td>9.2</td>
+<td>14.6</td>
+</tr>
+</tbody>
+</table>
+<p>Cada observación ocupa una única fila:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>datetime</th>
+<th>estacion</th>
+<th>variable</th>
+<th>valor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2004-01-01 01:00</td>
+<td>Belisario</td>
+<td>PM2.5</td>
+<td>12.3</td>
+</tr>
+<tr class="even">
+<td>2004-01-01 01:00</td>
+<td>Carapungo</td>
+<td>PM2.5</td>
+<td>8.7</td>
+</tr>
+<tr class="odd">
+<td>2004-01-01 01:00</td>
+<td>Cotocollao</td>
+<td>PM2.5</td>
+<td>15.1</td>
+</tr>
+<tr class="even">
+<td>2004-01-01 02:00</td>
+<td>Belisario</td>
+<td>PM2.5</td>
+<td>11.8</td>
+</tr>
+</tbody>
+</table>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Montar Google Drive</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> google.colab <span class="im">import</span> drive</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>drive.mount(<span class="st">'/content/drive'</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> glob</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Leer todos los archivos y construir DataFrame en formato largo</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>ruta <span class="op">=</span> <span class="st">'/content/drive/MyDrive/proyectoM5/data'</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>archivos <span class="op">=</span> glob.glob(os.path.join(ruta, <span class="st">'*.xlsx'</span>))</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> []</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> archivo <span class="kw">in</span> <span class="bu">sorted</span>(archivos):</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    variable <span class="op">=</span> os.path.basename(archivo).replace(<span class="st">'.xlsx'</span>, <span class="st">''</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.read_excel(archivo, header<span class="op">=</span><span class="dv">0</span>, skiprows<span class="op">=</span>[<span class="dv">1</span>])</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    df.rename(columns<span class="op">=</span>{df.columns[<span class="dv">0</span>]: <span class="st">'datetime'</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    df_long <span class="op">=</span> df.melt(id_vars<span class="op">=</span><span class="st">'datetime'</span>, var_name<span class="op">=</span><span class="st">'estacion'</span>, value_name<span class="op">=</span><span class="st">'valor'</span>)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    df_long[<span class="st">'variable'</span>] <span class="op">=</span> variable</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    dfs.append(df_long)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>df_total <span class="op">=</span> pd.concat(dfs, ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_total.shape)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="preguntas-analíticas" class="level2">
-<h2 class="anchored" data-anchor-id="preguntas-analíticas">Preguntas analíticas</h2>
-<ol type="1">
-<li>¿Qué estaciones de monitoreo registran los niveles más altos de contaminación y cómo se distribuyen geográficamente?</li>
-<li>¿Cómo han evolucionado los niveles de PM2.5 y NO2 en Quito entre 2004 y 2026?</li>
-<li>¿Qué contaminante representa mayor riesgo para la salud según estándares OMS y dónde se supera el límite con mayor frecuencia?</li>
-<li>¿Existe relación entre radiación solar/ultravioleta y los niveles de contaminantes atmosféricos?</li>
-</ol>
+<section id="exploración-inicial" class="level2">
+<h2 class="anchored" data-anchor-id="exploración-inicial">Exploración inicial</h2>
+<p>Se realizó un diagnóstico de valores faltantes por variable y estación, identificando diferencias significativas en la cobertura temporal de cada punto de monitoreo. Estaciones como Condado, Turubamba y Chillogallo presentan períodos de operación muy limitados, lo que se refleja en un alto porcentaje de nulos.</p>
 </section>
-<section id="dataset" class="level2">
-<h2 class="anchored" data-anchor-id="dataset">Dataset</h2>
-<p>Los datos provienen de la REMMAQ e incluyen registros horarios de 10 variables ambientales:</p>
+<section id="limpieza-y-transformaciones" class="level2">
+<h2 class="anchored" data-anchor-id="limpieza-y-transformaciones">Limpieza y transformaciones</h2>
+<p>Se aplicaron las siguientes transformaciones:</p>
+<p><strong>1. Conversión de fechas:</strong> La columna <code>datetime</code> se convirtió a formato <code>datetime64</code> con zona horaria UTC para garantizar consistencia temporal.</p>
+<p><strong>2. Conversión de valores:</strong> La columna <code>valor</code> se forzó a tipo numérico, convirtiendo a <code>NaN</code> cualquier entrada no convertible.</p>
+<p><strong>3. Filtrado de datos corruptos:</strong> Se definieron rangos físicamente válidos para cada variable y se eliminaron registros fuera de esos límites:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Rango válido</th>
+<th>Unidad</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CO</td>
+<td>0 – 100</td>
+<td>mg/m³</td>
+</tr>
+<tr class="even">
+<td>IUV</td>
+<td>0 – 20</td>
+<td>índice</td>
+</tr>
+<tr class="odd">
+<td>LLU</td>
+<td>0 – 60</td>
+<td>mm/h</td>
+</tr>
+<tr class="even">
+<td>NO2</td>
+<td>0 – 500</td>
+<td>µg/m³</td>
+</tr>
+<tr class="odd">
+<td>O3</td>
+<td>0 – 300</td>
+<td>µg/m³</td>
+</tr>
+<tr class="even">
+<td>PM10</td>
+<td>0 – 1500</td>
+<td>µg/m³</td>
+</tr>
+<tr class="odd">
+<td>PM2.5</td>
+<td>0 – 1000</td>
+<td>µg/m³</td>
+</tr>
+<tr class="even">
+<td>RS</td>
+<td>0 – 1500</td>
+<td>W/m²</td>
+</tr>
+<tr class="odd">
+<td>SO2</td>
+<td>0 – 800</td>
+<td>µg/m³</td>
+</tr>
+<tr class="even">
+<td>TMP</td>
+<td>-5 – 35</td>
+<td>°C</td>
+</tr>
+</tbody>
+</table>
+<p><strong>4. Incorporación de coordenadas geográficas:</strong> Se añadieron latitud y longitud para cada estación, permitiendo visualizaciones geoespaciales.</p>
+</section>
+<section id="dataset-final" class="level2">
+<h2 class="anchored" data-anchor-id="dataset-final">Dataset final</h2>
+<p>El dataset limpio se exportó en formato <strong>Parquet</strong> para optimizar el rendimiento de carga en las visualizaciones:</p>
 <ul>
-<li><strong>Contaminantes:</strong> PM2.5, PM10, NO2, SO2, CO, O3</li>
-<li><strong>Variables meteorológicas:</strong> Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Lluvia (LLU)</li>
-<li><strong>Período:</strong> enero 2004 – febrero 2026</li>
-<li><strong>Estaciones:</strong> 13 puntos de monitoreo distribuidos en Quito</li>
-</ul>
-</section>
-<section id="estructura-del-proyecto" class="level2">
-<h2 class="anchored" data-anchor-id="estructura-del-proyecto">Estructura del proyecto</h2>
-<ul>
-<li><a href="./data_cleaning.html">Limpieza de Datos</a> — proceso de preparación y transformación del dataset</li>
-<li><a href="./visualizations.html">Visualizaciones</a> — análisis visual para responder las preguntas analíticas</li>
+<li><strong>Archivo:</strong> <code>remmaq_clean.parquet</code></li>
+<li><strong>Columnas:</strong> <code>datetime</code>, <code>estacion</code>, <code>valor</code>, <code>variable</code>, <code>latitud</code>, <code>longitud</code></li>
+<li><strong>Estaciones:</strong> 13 puntos de monitoreo en el Distrito Metropolitano de Quito</li>
+<li><strong>Variables:</strong> 14 (contaminantes y meteorológicas)</li>
+<li><strong>Período:</strong> enero 2004 – diciembre 2025</li>
 </ul>
 
 
@@ -690,41 +833,114 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     }
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Calidad del Aire en Quito"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Análisis histórico de la Red Metropolitana de Monitoreo Atmosférico (REMMAQ) 2004–2026"</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Daniel"</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> today</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## Contexto del problema</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>Quito, capital del Ecuador, enfrenta desafíos significativos en materia de calidad del aire debido a su crecimiento urbano, el incremento del parque automotor y su particular topografía andina. La Red Metropolitana de Monitoreo Atmosférico (REMMAQ) registra desde 2004 datos horarios de contaminantes y variables meteorológicas en múltiples estaciones distribuidas a lo largo de la ciudad.</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## Motivación</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>Comprender cómo ha evolucionado la calidad del aire en Quito durante más de dos décadas permite identificar tendencias, zonas críticas y la relación entre factores ambientales y niveles de contaminación — información clave para la toma de decisiones en salud pública y política ambiental.</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## Preguntas analíticas</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>¿Qué estaciones de monitoreo registran los niveles más altos de contaminación y cómo se distribuyen geográficamente?</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>¿Cómo han evolucionado los niveles de PM2.5 y NO2 en Quito entre 2004 y 2026?</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>¿Qué contaminante representa mayor riesgo para la salud según estándares OMS y dónde se supera el límite con mayor frecuencia?</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>¿Existe relación entre radiación solar/ultravioleta y los niveles de contaminantes atmosféricos?</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Dataset</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>Los datos provienen de la REMMAQ e incluyen registros horarios de 10 variables ambientales:</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Contaminantes:** PM2.5, PM10, NO2, SO2, CO, O3</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Variables meteorológicas:** Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Lluvia (LLU)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Período:** enero 2004 – febrero 2026</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Estaciones:** 13 puntos de monitoreo distribuidos en Quito</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">## Estructura del proyecto</span></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Limpieza de Datos</span><span class="co">](data_cleaning.qmd)</span> — proceso de preparación y transformación del dataset</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Visualizaciones</span><span class="co">](visualizations.qmd)</span> — análisis visual para responder las preguntas analíticas</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Limpieza y Preparación de Datos"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Daniel Z. Juca"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> today</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">## Fuente de datos</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>Se trabajó con 14 archivos Excel descargados de la REMMAQ — uno por variable —, </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>cada uno con una fila de unidades que fue omitida en la carga y una columna </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>por estación de monitoreo.</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">## Carga y estructura inicial</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>Cada archivo contiene una columna de fecha/hora y una columna por estación de </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>monitoreo. Para facilitar el análisis, los 14 archivos se transformaron a formato </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>**tidy** (largo): cada fila representa una observación única de una variable, en </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>una estación y un momento determinado.</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>Por ejemplo, en lugar de tener una columna por estación:</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> datetime <span class="pp">|</span> Belisario <span class="pp">|</span> Carapungo <span class="pp">|</span> Cotocollao <span class="pp">|</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2004-01-01 01:00 <span class="pp">|</span> 12.3 <span class="pp">|</span> 8.7 <span class="pp">|</span> 15.1 <span class="pp">|</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2004-01-01 02:00 <span class="pp">|</span> 11.8 <span class="pp">|</span> 9.2 <span class="pp">|</span> 14.6 <span class="pp">|</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>Cada observación ocupa una única fila:</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> datetime <span class="pp">|</span> estacion <span class="pp">|</span> variable <span class="pp">|</span> valor <span class="pp">|</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2004-01-01 01:00 <span class="pp">|</span> Belisario <span class="pp">|</span> PM2.5 <span class="pp">|</span> 12.3 <span class="pp">|</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2004-01-01 01:00 <span class="pp">|</span> Carapungo <span class="pp">|</span> PM2.5 <span class="pp">|</span> 8.7 <span class="pp">|</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2004-01-01 01:00 <span class="pp">|</span> Cotocollao <span class="pp">|</span> PM2.5 <span class="pp">|</span> 15.1 <span class="pp">|</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2004-01-01 02:00 <span class="pp">|</span> Belisario <span class="pp">|</span> PM2.5 <span class="pp">|</span> 11.8 <span class="pp">|</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="in">```python</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Montar Google Drive</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> google.colab <span class="im">import</span> drive</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>drive.mount(<span class="st">'/content/drive'</span>)</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> glob</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Leer todos los archivos y construir DataFrame en formato largo</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>ruta <span class="op">=</span> <span class="st">'/content/drive/MyDrive/proyectoM5/data'</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>archivos <span class="op">=</span> glob.glob(os.path.join(ruta, <span class="st">'*.xlsx'</span>))</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> []</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> archivo <span class="kw">in</span> <span class="bu">sorted</span>(archivos):</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>    variable <span class="op">=</span> os.path.basename(archivo).replace(<span class="st">'.xlsx'</span>, <span class="st">''</span>)</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>    df <span class="op">=</span> pd.read_excel(archivo, header<span class="op">=</span><span class="dv">0</span>, skiprows<span class="op">=</span>[<span class="dv">1</span>])</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    df.rename(columns<span class="op">=</span>{df.columns[<span class="dv">0</span>]: <span class="st">'datetime'</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    df_long <span class="op">=</span> df.melt(id_vars<span class="op">=</span><span class="st">'datetime'</span>, var_name<span class="op">=</span><span class="st">'estacion'</span>, value_name<span class="op">=</span><span class="st">'valor'</span>)</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    df_long[<span class="st">'variable'</span>] <span class="op">=</span> variable</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>    dfs.append(df_long)</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>df_total <span class="op">=</span> pd.concat(dfs, ignore_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_total.shape)</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exploración inicial</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>Se realizó un diagnóstico de valores faltantes por variable y estación, identificando </span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>diferencias significativas en la cobertura temporal de cada punto de monitoreo. </span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>Estaciones como Condado, Turubamba y Chillogallo presentan períodos de operación </span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>muy limitados, lo que se refleja en un alto porcentaje de nulos.</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a><span class="fu">## Limpieza y transformaciones</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>Se aplicaron las siguientes transformaciones:</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>**1. Conversión de fechas:** La columna <span class="in">`datetime`</span> se convirtió a formato </span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a><span class="in">`datetime64`</span> con zona horaria UTC para garantizar consistencia temporal.</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>**2. Conversión de valores:** La columna <span class="in">`valor`</span> se forzó a tipo numérico, </span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>convirtiendo a <span class="in">`NaN`</span> cualquier entrada no convertible.</span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>**3. Filtrado de datos corruptos:** Se definieron rangos físicamente válidos </span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>para cada variable y se eliminaron registros fuera de esos límites:</span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Variable <span class="pp">|</span> Rango válido <span class="pp">|</span> Unidad <span class="pp">|</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> CO <span class="pp">|</span> 0 – 100 <span class="pp">|</span> mg/m³ <span class="pp">|</span></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> IUV <span class="pp">|</span> 0 – 20 <span class="pp">|</span> índice <span class="pp">|</span></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> LLU <span class="pp">|</span> 0 – 60 <span class="pp">|</span> mm/h <span class="pp">|</span></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> NO2 <span class="pp">|</span> 0 – 500 <span class="pp">|</span> µg/m³ <span class="pp">|</span></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> O3 <span class="pp">|</span> 0 – 300 <span class="pp">|</span> µg/m³ <span class="pp">|</span></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> PM10 <span class="pp">|</span> 0 – 1500 <span class="pp">|</span> µg/m³ <span class="pp">|</span></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> PM2.5 <span class="pp">|</span> 0 – 1000 <span class="pp">|</span> µg/m³ <span class="pp">|</span></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> RS <span class="pp">|</span> 0 – 1500 <span class="pp">|</span> W/m² <span class="pp">|</span></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> SO2 <span class="pp">|</span> 0 – 800 <span class="pp">|</span> µg/m³ <span class="pp">|</span></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> TMP <span class="pp">|</span> -5 – 35 <span class="pp">|</span> °C <span class="pp">|</span></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>**4. Incorporación de coordenadas geográficas:** Se añadieron latitud y longitud </span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>para cada estación, permitiendo visualizaciones geoespaciales.</span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a><span class="fu">## Dataset final</span></span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>El dataset limpio se exportó en formato **Parquet** para optimizar el rendimiento </span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>de carga en las visualizaciones:</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Archivo:** <span class="in">`remmaq_clean.parquet`</span></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Columnas:** <span class="in">`datetime`</span>, <span class="in">`estacion`</span>, <span class="in">`valor`</span>, <span class="in">`variable`</span>, <span class="in">`latitud`</span>, <span class="in">`longitud`</span></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Estaciones:** 13 puntos de monitoreo en el Distrito Metropolitano de Quito</span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Variables:** 14 (contaminantes y meteorológicas)</span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Período:** enero 2004 – diciembre 2025</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

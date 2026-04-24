@@ -2,44 +2,44 @@
   {
     "objectID": "data_cleaning.html",
     "href": "data_cleaning.html",
-    "title": "Calidad del Aire en Quito",
+    "title": "Limpieza y Preparación de Datos",
     "section": "",
-    "text": "Quito, capital del Ecuador, enfrenta desafíos significativos en materia de calidad del aire debido a su crecimiento urbano, el incremento del parque automotor y su particular topografía andina. La Red Metropolitana de Monitoreo Atmosférico (REMMAQ) registra desde 2004 datos horarios de contaminantes y variables meteorológicas en múltiples estaciones distribuidas a lo largo de la ciudad."
+    "text": "Se trabajó con 14 archivos Excel descargados de la REMMAQ — uno por variable —, cada uno con una fila de unidades que fue omitida en la carga y una columna por estación de monitoreo."
   },
   {
-    "objectID": "data_cleaning.html#contexto-del-problema",
-    "href": "data_cleaning.html#contexto-del-problema",
-    "title": "Calidad del Aire en Quito",
+    "objectID": "data_cleaning.html#fuente-de-datos",
+    "href": "data_cleaning.html#fuente-de-datos",
+    "title": "Limpieza y Preparación de Datos",
     "section": "",
-    "text": "Quito, capital del Ecuador, enfrenta desafíos significativos en materia de calidad del aire debido a su crecimiento urbano, el incremento del parque automotor y su particular topografía andina. La Red Metropolitana de Monitoreo Atmosférico (REMMAQ) registra desde 2004 datos horarios de contaminantes y variables meteorológicas en múltiples estaciones distribuidas a lo largo de la ciudad."
+    "text": "Se trabajó con 14 archivos Excel descargados de la REMMAQ — uno por variable —, cada uno con una fila de unidades que fue omitida en la carga y una columna por estación de monitoreo."
   },
   {
-    "objectID": "data_cleaning.html#motivación",
-    "href": "data_cleaning.html#motivación",
-    "title": "Calidad del Aire en Quito",
-    "section": "Motivación",
-    "text": "Motivación\nComprender cómo ha evolucionado la calidad del aire en Quito durante más de dos décadas permite identificar tendencias, zonas críticas y la relación entre factores ambientales y niveles de contaminación — información clave para la toma de decisiones en salud pública y política ambiental."
+    "objectID": "data_cleaning.html#carga-y-estructura-inicial",
+    "href": "data_cleaning.html#carga-y-estructura-inicial",
+    "title": "Limpieza y Preparación de Datos",
+    "section": "Carga y estructura inicial",
+    "text": "Carga y estructura inicial\nCada archivo contiene una columna de fecha/hora y una columna por estación de monitoreo. Para facilitar el análisis, los 14 archivos se transformaron a formato tidy (largo): cada fila representa una observación única de una variable, en una estación y un momento determinado.\nPor ejemplo, en lugar de tener una columna por estación:\n\n\n\ndatetime\nBelisario\nCarapungo\nCotocollao\n\n\n\n\n2004-01-01 01:00\n12.3\n8.7\n15.1\n\n\n2004-01-01 02:00\n11.8\n9.2\n14.6\n\n\n\nCada observación ocupa una única fila:\n\n\n\ndatetime\nestacion\nvariable\nvalor\n\n\n\n\n2004-01-01 01:00\nBelisario\nPM2.5\n12.3\n\n\n2004-01-01 01:00\nCarapungo\nPM2.5\n8.7\n\n\n2004-01-01 01:00\nCotocollao\nPM2.5\n15.1\n\n\n2004-01-01 02:00\nBelisario\nPM2.5\n11.8\n\n\n\n# Montar Google Drive\nfrom google.colab import drive\ndrive.mount('/content/drive')\n\nimport pandas as pd\nimport numpy as np\nimport os\nimport glob\n\n# Leer todos los archivos y construir DataFrame en formato largo\nruta = '/content/drive/MyDrive/proyectoM5/data'\narchivos = glob.glob(os.path.join(ruta, '*.xlsx'))\n\ndfs = []\nfor archivo in sorted(archivos):\n    variable = os.path.basename(archivo).replace('.xlsx', '')\n    df = pd.read_excel(archivo, header=0, skiprows=[1])\n    df.rename(columns={df.columns[0]: 'datetime'}, inplace=True)\n    df_long = df.melt(id_vars='datetime', var_name='estacion', value_name='valor')\n    df_long['variable'] = variable\n    dfs.append(df_long)\n\ndf_total = pd.concat(dfs, ignore_index=True)\nprint(df_total.shape)"
   },
   {
-    "objectID": "data_cleaning.html#preguntas-analíticas",
-    "href": "data_cleaning.html#preguntas-analíticas",
-    "title": "Calidad del Aire en Quito",
-    "section": "Preguntas analíticas",
-    "text": "Preguntas analíticas\n\n¿Qué estaciones de monitoreo registran los niveles más altos de contaminación y cómo se distribuyen geográficamente?\n¿Cómo han evolucionado los niveles de PM2.5 y NO2 en Quito entre 2004 y 2026?\n¿Qué contaminante representa mayor riesgo para la salud según estándares OMS y dónde se supera el límite con mayor frecuencia?\n¿Existe relación entre radiación solar/ultravioleta y los niveles de contaminantes atmosféricos?"
+    "objectID": "data_cleaning.html#exploración-inicial",
+    "href": "data_cleaning.html#exploración-inicial",
+    "title": "Limpieza y Preparación de Datos",
+    "section": "Exploración inicial",
+    "text": "Exploración inicial\nSe realizó un diagnóstico de valores faltantes por variable y estación, identificando diferencias significativas en la cobertura temporal de cada punto de monitoreo. Estaciones como Condado, Turubamba y Chillogallo presentan períodos de operación muy limitados, lo que se refleja en un alto porcentaje de nulos."
   },
   {
-    "objectID": "data_cleaning.html#dataset",
-    "href": "data_cleaning.html#dataset",
-    "title": "Calidad del Aire en Quito",
-    "section": "Dataset",
-    "text": "Dataset\nLos datos provienen de la REMMAQ e incluyen registros horarios de 10 variables ambientales:\n\nContaminantes: PM2.5, PM10, NO2, SO2, CO, O3\nVariables meteorológicas: Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Lluvia (LLU)\nPeríodo: enero 2004 – febrero 2026\nEstaciones: 13 puntos de monitoreo distribuidos en Quito"
+    "objectID": "data_cleaning.html#limpieza-y-transformaciones",
+    "href": "data_cleaning.html#limpieza-y-transformaciones",
+    "title": "Limpieza y Preparación de Datos",
+    "section": "Limpieza y transformaciones",
+    "text": "Limpieza y transformaciones\nSe aplicaron las siguientes transformaciones:\n1. Conversión de fechas: La columna datetime se convirtió a formato datetime64 con zona horaria UTC para garantizar consistencia temporal.\n2. Conversión de valores: La columna valor se forzó a tipo numérico, convirtiendo a NaN cualquier entrada no convertible.\n3. Filtrado de datos corruptos: Se definieron rangos físicamente válidos para cada variable y se eliminaron registros fuera de esos límites:\n\n\n\nVariable\nRango válido\nUnidad\n\n\n\n\nCO\n0 – 100\nmg/m³\n\n\nIUV\n0 – 20\níndice\n\n\nLLU\n0 – 60\nmm/h\n\n\nNO2\n0 – 500\nµg/m³\n\n\nO3\n0 – 300\nµg/m³\n\n\nPM10\n0 – 1500\nµg/m³\n\n\nPM2.5\n0 – 1000\nµg/m³\n\n\nRS\n0 – 1500\nW/m²\n\n\nSO2\n0 – 800\nµg/m³\n\n\nTMP\n-5 – 35\n°C\n\n\n\n4. Incorporación de coordenadas geográficas: Se añadieron latitud y longitud para cada estación, permitiendo visualizaciones geoespaciales."
   },
   {
-    "objectID": "data_cleaning.html#estructura-del-proyecto",
-    "href": "data_cleaning.html#estructura-del-proyecto",
-    "title": "Calidad del Aire en Quito",
-    "section": "Estructura del proyecto",
-    "text": "Estructura del proyecto\n\nLimpieza de Datos — proceso de preparación y transformación del dataset\nVisualizaciones — análisis visual para responder las preguntas analíticas"
+    "objectID": "data_cleaning.html#dataset-final",
+    "href": "data_cleaning.html#dataset-final",
+    "title": "Limpieza y Preparación de Datos",
+    "section": "Dataset final",
+    "text": "Dataset final\nEl dataset limpio se exportó en formato Parquet para optimizar el rendimiento de carga en las visualizaciones:\n\nArchivo: remmaq_clean.parquet\nColumnas: datetime, estacion, valor, variable, latitud, longitud\nEstaciones: 13 puntos de monitoreo en el Distrito Metropolitano de Quito\nVariables: 14 (contaminantes y meteorológicas)\nPeríodo: enero 2004 – diciembre 2025"
   },
   {
     "objectID": "visualizations.html",
@@ -81,35 +81,35 @@
     "href": "index.html",
     "title": "Calidad del Aire en Quito",
     "section": "",
-    "text": "Quito, capital del Ecuador, enfrenta desafíos significativos en materia de calidad del aire debido a su crecimiento urbano, el incremento del parque automotor y su particular topografía andina. La Red Metropolitana de Monitoreo Atmosférico (REMMAQ) registra desde 2004 datos horarios de contaminantes y variables meteorológicas en múltiples estaciones distribuidas a lo largo de la ciudad."
+    "text": "Quito es una de las pocas ciudades del Ecuador con una red de monitoreo atmosférico consolidada. Con más de 800.000 vehículos circulando diariamente y una topografía andina que dificulta la dispersión de contaminantes, la calidad del aire de la capital ecuatoriana es un tema de relevancia para la salud pública y la política ambiental."
   },
   {
     "objectID": "index.html#contexto-del-problema",
     "href": "index.html#contexto-del-problema",
     "title": "Calidad del Aire en Quito",
     "section": "",
-    "text": "Quito, capital del Ecuador, enfrenta desafíos significativos en materia de calidad del aire debido a su crecimiento urbano, el incremento del parque automotor y su particular topografía andina. La Red Metropolitana de Monitoreo Atmosférico (REMMAQ) registra desde 2004 datos horarios de contaminantes y variables meteorológicas en múltiples estaciones distribuidas a lo largo de la ciudad."
+    "text": "Quito es una de las pocas ciudades del Ecuador con una red de monitoreo atmosférico consolidada. Con más de 800.000 vehículos circulando diariamente y una topografía andina que dificulta la dispersión de contaminantes, la calidad del aire de la capital ecuatoriana es un tema de relevancia para la salud pública y la política ambiental."
   },
   {
     "objectID": "index.html#motivación",
     "href": "index.html#motivación",
     "title": "Calidad del Aire en Quito",
     "section": "Motivación",
-    "text": "Motivación\nComprender cómo ha evolucionado la calidad del aire en Quito durante más de dos décadas permite identificar tendencias, zonas críticas y la relación entre factores ambientales y niveles de contaminación — información clave para la toma de decisiones en salud pública y política ambiental."
+    "text": "Motivación\nExplorar más de dos décadas de datos atmosféricos en Quito para identificar patrones, tendencias y relaciones entre variables ambientales — con el objetivo de entender qué nos dicen los datos sobre la calidad del aire que respiran los quiteños."
   },
   {
     "objectID": "index.html#preguntas-analíticas",
     "href": "index.html#preguntas-analíticas",
     "title": "Calidad del Aire en Quito",
     "section": "Preguntas analíticas",
-    "text": "Preguntas analíticas\n\n¿Qué estaciones de monitoreo registran los niveles más altos de contaminación y cómo se distribuyen geográficamente?\n¿Cómo han evolucionado los niveles de PM2.5 y NO2 en Quito entre 2004 y 2026?\n¿Qué contaminante representa mayor riesgo para la salud según estándares OMS y dónde se supera el límite con mayor frecuencia?\n¿Existe relación entre radiación solar/ultravioleta y los niveles de contaminantes atmosféricos?"
+    "text": "Preguntas analíticas\n\n¿Cómo se distribuye la red de monitoreo de calidad del aire en Quito y cuál es su cobertura?\n¿Qué contaminante representa mayor riesgo para la salud y dónde se supera el límite con mayor frecuencia?\n¿Cómo varía la concentración de PM2.5 según la dirección del viento en tres zonas de Quito?\n¿Cómo influye la radiación solar en la formación de ozono troposférico y NO₂ en Quito?"
   },
   {
     "objectID": "index.html#dataset",
     "href": "index.html#dataset",
     "title": "Calidad del Aire en Quito",
     "section": "Dataset",
-    "text": "Dataset\nLos datos provienen de la REMMAQ e incluyen registros horarios de 10 variables ambientales:\n\nContaminantes: PM2.5, PM10, NO2, SO2, CO, O3\nVariables meteorológicas: Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Lluvia (LLU)\nPeríodo: enero 2004 – febrero 2026\nEstaciones: 13 puntos de monitoreo distribuidos en Quito"
+    "text": "Dataset\nLos datos provienen de la REMMAQ e incluyen más de 15 millones de registros horarios de 14 variables ambientales distribuidos en 13 estaciones de monitoreo:\n\nContaminantes: PM2.5, PM10, NO2, SO2, CO, O3\nVariables meteorológicas: Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Precipitación (LLU), Dirección del viento (DIR), Velocidad del viento (VEL), Humedad relativa (HR), Presión barométrica (PB)\nPeríodo: enero 2004 – diciembre 2025\nEstaciones: 13 puntos de monitoreo distribuidos en el Distrito Metropolitano de Quito\n\nLos datos están disponibles públicamente en el portal de la Secretaría de Ambiente del Municipio de Quito: datosambiente.quito.gob.ec"
   },
   {
     "objectID": "index.html#estructura-del-proyecto",

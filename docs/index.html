@@ -6,8 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Daniel">
-<meta name="dcterms.date" content="2026-04-23">
+<meta name="author" content="Daniel Z. Juca">
+<meta name="dcterms.date" content="2026-04-24">
 
 <title>Calidad del Aire en Quito</title>
 <style>
@@ -170,7 +170,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">Calidad del Aire en Quito</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
-<p class="subtitle lead">Análisis histórico de la Red Metropolitana de Monitoreo Atmosférico (REMMAQ) 2004–2026</p>
+<p class="subtitle lead">Quito respira — análisis visual de datos REMMAQ 2004–2025</p>
 </div>
 
 
@@ -180,14 +180,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Daniel </p>
+             <p>Daniel Z. Juca </p>
           </div>
   </div>
     
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">April 23, 2026</p>
+      <p class="date">April 24, 2026</p>
     </div>
   </div>
   
@@ -201,30 +201,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="contexto-del-problema" class="level2">
 <h2 class="anchored" data-anchor-id="contexto-del-problema">Contexto del problema</h2>
-<p>Quito, capital del Ecuador, enfrenta desafíos significativos en materia de calidad del aire debido a su crecimiento urbano, el incremento del parque automotor y su particular topografía andina. La Red Metropolitana de Monitoreo Atmosférico (REMMAQ) registra desde 2004 datos horarios de contaminantes y variables meteorológicas en múltiples estaciones distribuidas a lo largo de la ciudad.</p>
+<p>Quito es una de las pocas ciudades del Ecuador con una red de monitoreo atmosférico consolidada. Con más de 800.000 vehículos circulando diariamente y una topografía andina que dificulta la dispersión de contaminantes, la calidad del aire de la capital ecuatoriana es un tema de relevancia para la salud pública y la política ambiental.</p>
 </section>
 <section id="motivación" class="level2">
 <h2 class="anchored" data-anchor-id="motivación">Motivación</h2>
-<p>Comprender cómo ha evolucionado la calidad del aire en Quito durante más de dos décadas permite identificar tendencias, zonas críticas y la relación entre factores ambientales y niveles de contaminación — información clave para la toma de decisiones en salud pública y política ambiental.</p>
+<p>Explorar más de dos décadas de datos atmosféricos en Quito para identificar patrones, tendencias y relaciones entre variables ambientales — con el objetivo de entender qué nos dicen los datos sobre la calidad del aire que respiran los quiteños.</p>
 </section>
 <section id="preguntas-analíticas" class="level2">
 <h2 class="anchored" data-anchor-id="preguntas-analíticas">Preguntas analíticas</h2>
 <ol type="1">
-<li>¿Qué estaciones de monitoreo registran los niveles más altos de contaminación y cómo se distribuyen geográficamente?</li>
-<li>¿Cómo han evolucionado los niveles de PM2.5 y NO2 en Quito entre 2004 y 2026?</li>
-<li>¿Qué contaminante representa mayor riesgo para la salud según estándares OMS y dónde se supera el límite con mayor frecuencia?</li>
-<li>¿Existe relación entre radiación solar/ultravioleta y los niveles de contaminantes atmosféricos?</li>
+<li>¿Cómo se distribuye la red de monitoreo de calidad del aire en Quito y cuál es su cobertura?</li>
+<li>¿Qué contaminante representa mayor riesgo para la salud y dónde se supera el límite con mayor frecuencia?</li>
+<li>¿Cómo varía la concentración de PM2.5 según la dirección del viento en tres zonas de Quito?</li>
+<li>¿Cómo influye la radiación solar en la formación de ozono troposférico y NO₂ en Quito?</li>
 </ol>
 </section>
 <section id="dataset" class="level2">
 <h2 class="anchored" data-anchor-id="dataset">Dataset</h2>
-<p>Los datos provienen de la REMMAQ e incluyen registros horarios de 10 variables ambientales:</p>
+<p>Los datos provienen de la REMMAQ e incluyen más de <strong>15 millones de registros horarios</strong> de 14 variables ambientales distribuidos en 13 estaciones de monitoreo:</p>
 <ul>
 <li><strong>Contaminantes:</strong> PM2.5, PM10, NO2, SO2, CO, O3</li>
-<li><strong>Variables meteorológicas:</strong> Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Lluvia (LLU)</li>
-<li><strong>Período:</strong> enero 2004 – febrero 2026</li>
-<li><strong>Estaciones:</strong> 13 puntos de monitoreo distribuidos en Quito</li>
+<li><strong>Variables meteorológicas:</strong> Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Precipitación (LLU), Dirección del viento (DIR), Velocidad del viento (VEL), Humedad relativa (HR), Presión barométrica (PB)</li>
+<li><strong>Período:</strong> enero 2004 – diciembre 2025</li>
+<li><strong>Estaciones:</strong> 13 puntos de monitoreo distribuidos en el Distrito Metropolitano de Quito</li>
 </ul>
+<p>Los datos están disponibles públicamente en el portal de la Secretaría de Ambiente del Municipio de Quito: <a href="https://datosambiente.quito.gob.ec">datosambiente.quito.gob.ec</a></p>
 </section>
 <section id="estructura-del-proyecto" class="level2">
 <h2 class="anchored" data-anchor-id="estructura-del-proyecto">Estructura del proyecto</h2>
@@ -692,39 +693,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Calidad del Aire en Quito"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Análisis histórico de la Red Metropolitana de Monitoreo Atmosférico (REMMAQ) 2004–2026"</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Daniel"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Quito respira — análisis visual de datos REMMAQ 2004–2025"</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Daniel Z. Juca"</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> today</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">## Contexto del problema</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>Quito, capital del Ecuador, enfrenta desafíos significativos en materia de calidad del aire debido a su crecimiento urbano, el incremento del parque automotor y su particular topografía andina. La Red Metropolitana de Monitoreo Atmosférico (REMMAQ) registra desde 2004 datos horarios de contaminantes y variables meteorológicas en múltiples estaciones distribuidas a lo largo de la ciudad.</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## Motivación</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>Comprender cómo ha evolucionado la calidad del aire en Quito durante más de dos décadas permite identificar tendencias, zonas críticas y la relación entre factores ambientales y niveles de contaminación — información clave para la toma de decisiones en salud pública y política ambiental.</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## Preguntas analíticas</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>¿Qué estaciones de monitoreo registran los niveles más altos de contaminación y cómo se distribuyen geográficamente?</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>¿Cómo han evolucionado los niveles de PM2.5 y NO2 en Quito entre 2004 y 2026?</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>¿Qué contaminante representa mayor riesgo para la salud según estándares OMS y dónde se supera el límite con mayor frecuencia?</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>¿Existe relación entre radiación solar/ultravioleta y los niveles de contaminantes atmosféricos?</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>Quito es una de las pocas ciudades del Ecuador con una red de monitoreo atmosférico </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>consolidada. Con más de 800.000 vehículos circulando diariamente y una topografía andina </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>que dificulta la dispersión de contaminantes, la calidad del aire de la capital ecuatoriana </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>es un tema de relevancia para la salud pública y la política ambiental.</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## Motivación</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>Explorar más de dos décadas de datos atmosféricos en Quito para identificar </span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>patrones, tendencias y relaciones entre variables ambientales — con el objetivo de entender </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>qué nos dicen los datos sobre la calidad del aire que respiran los quiteños.</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="fu">## Preguntas analíticas</span></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Dataset</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>Los datos provienen de la REMMAQ e incluyen registros horarios de 10 variables ambientales:</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Contaminantes:** PM2.5, PM10, NO2, SO2, CO, O3</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Variables meteorológicas:** Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Lluvia (LLU)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Período:** enero 2004 – febrero 2026</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Estaciones:** 13 puntos de monitoreo distribuidos en Quito</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>¿Cómo se distribuye la red de monitoreo de calidad del aire en Quito y cuál es su cobertura?</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>¿Qué contaminante representa mayor riesgo para la salud y dónde se supera el límite con mayor frecuencia?</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>¿Cómo varía la concentración de PM2.5 según la dirección del viento en tres zonas de Quito?</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="ss">4. </span>¿Cómo influye la radiación solar en la formación de ozono troposférico y NO₂ en Quito?</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="fu">## Dataset</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>Los datos provienen de la REMMAQ e incluyen más de **15 millones de registros horarios** de 14 variables ambientales distribuidos en 13 estaciones de monitoreo:</span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">## Estructura del proyecto</span></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Limpieza de Datos</span><span class="co">](data_cleaning.qmd)</span> — proceso de preparación y transformación del dataset</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Visualizaciones</span><span class="co">](visualizations.qmd)</span> — análisis visual para responder las preguntas analíticas</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Contaminantes:** PM2.5, PM10, NO2, SO2, CO, O3</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Variables meteorológicas:** Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Precipitación (LLU), Dirección del viento (DIR), Velocidad del viento (VEL), Humedad relativa (HR), Presión barométrica (PB)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Período:** enero 2004 – diciembre 2025</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**Estaciones:** 13 puntos de monitoreo distribuidos en el Distrito Metropolitano de Quito</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>Los datos están disponibles públicamente en el portal de la Secretaría de Ambiente del Municipio de Quito: <span class="co">[</span><span class="ot">datosambiente.quito.gob.ec</span><span class="co">](https://datosambiente.quito.gob.ec)</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="fu">## Estructura del proyecto</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Limpieza de Datos</span><span class="co">](data_cleaning.qmd)</span> — proceso de preparación y transformación del dataset</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Visualizaciones</span><span class="co">](visualizations.qmd)</span> — análisis visual para responder las preguntas analíticas</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
