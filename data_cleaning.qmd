@@ -1,35 +1,108 @@
 ---
-title: "Calidad del Aire en Quito"
-subtitle: "Análisis histórico de la Red Metropolitana de Monitoreo Atmosférico (REMMAQ) 2004–2026"
-author: "Daniel"
+title: "Limpieza y Preparación de Datos"
+author: "Daniel Z. Juca"
 date: today
 ---
 
-## Contexto del problema
+## Fuente de datos
 
-Quito, capital del Ecuador, enfrenta desafíos significativos en materia de calidad del aire debido a su crecimiento urbano, el incremento del parque automotor y su particular topografía andina. La Red Metropolitana de Monitoreo Atmosférico (REMMAQ) registra desde 2004 datos horarios de contaminantes y variables meteorológicas en múltiples estaciones distribuidas a lo largo de la ciudad.
+Se trabajó con 14 archivos Excel descargados de la REMMAQ — uno por variable —, 
+cada uno con una fila de unidades que fue omitida en la carga y una columna 
+por estación de monitoreo.
 
-## Motivación
+## Carga y estructura inicial
 
-Comprender cómo ha evolucionado la calidad del aire en Quito durante más de dos décadas permite identificar tendencias, zonas críticas y la relación entre factores ambientales y niveles de contaminación — información clave para la toma de decisiones en salud pública y política ambiental.
+Cada archivo contiene una columna de fecha/hora y una columna por estación de 
+monitoreo. Para facilitar el análisis, los 14 archivos se transformaron a formato 
+**tidy** (largo): cada fila representa una observación única de una variable, en 
+una estación y un momento determinado.
 
-## Preguntas analíticas
+Por ejemplo, en lugar de tener una columna por estación:
 
-1. ¿Qué estaciones de monitoreo registran los niveles más altos de contaminación y cómo se distribuyen geográficamente?
-2. ¿Cómo han evolucionado los niveles de PM2.5 y NO2 en Quito entre 2004 y 2026?
-3. ¿Qué contaminante representa mayor riesgo para la salud según estándares OMS y dónde se supera el límite con mayor frecuencia?
-4. ¿Existe relación entre radiación solar/ultravioleta y los niveles de contaminantes atmosféricos?
+| datetime | Belisario | Carapungo | Cotocollao |
+|---|---|---|---|
+| 2004-01-01 01:00 | 12.3 | 8.7 | 15.1 |
+| 2004-01-01 02:00 | 11.8 | 9.2 | 14.6 |
 
-## Dataset
+Cada observación ocupa una única fila:
 
-Los datos provienen de la REMMAQ e incluyen registros horarios de 10 variables ambientales:
+| datetime | estacion | variable | valor |
+|---|---|---|---|
+| 2004-01-01 01:00 | Belisario | PM2.5 | 12.3 |
+| 2004-01-01 01:00 | Carapungo | PM2.5 | 8.7 |
+| 2004-01-01 01:00 | Cotocollao | PM2.5 | 15.1 |
+| 2004-01-01 02:00 | Belisario | PM2.5 | 11.8 |
 
-- **Contaminantes:** PM2.5, PM10, NO2, SO2, CO, O3
-- **Variables meteorológicas:** Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Lluvia (LLU)
-- **Período:** enero 2004 – febrero 2026
-- **Estaciones:** 13 puntos de monitoreo distribuidos en Quito
+```python
+# Montar Google Drive
+from google.colab import drive
+drive.mount('/content/drive')
 
-## Estructura del proyecto
+import pandas as pd
+import numpy as np
+import os
+import glob
 
-- [Limpieza de Datos](data_cleaning.qmd) — proceso de preparación y transformación del dataset
-- [Visualizaciones](visualizations.qmd) — análisis visual para responder las preguntas analíticas
+# Leer todos los archivos y construir DataFrame en formato largo
+ruta = '/content/drive/MyDrive/proyectoM5/data'
+archivos = glob.glob(os.path.join(ruta, '*.xlsx'))
+
+dfs = []
+for archivo in sorted(archivos):
+    variable = os.path.basename(archivo).replace('.xlsx', '')
+    df = pd.read_excel(archivo, header=0, skiprows=[1])
+    df.rename(columns={df.columns[0]: 'datetime'}, inplace=True)
+    df_long = df.melt(id_vars='datetime', var_name='estacion', value_name='valor')
+    df_long['variable'] = variable
+    dfs.append(df_long)
+
+df_total = pd.concat(dfs, ignore_index=True)
+print(df_total.shape)
+```
+
+## Exploración inicial
+
+Se realizó un diagnóstico de valores faltantes por variable y estación, identificando 
+diferencias significativas en la cobertura temporal de cada punto de monitoreo. 
+Estaciones como Condado, Turubamba y Chillogallo presentan períodos de operación 
+muy limitados, lo que se refleja en un alto porcentaje de nulos.
+
+## Limpieza y transformaciones
+
+Se aplicaron las siguientes transformaciones:
+
+**1. Conversión de fechas:** La columna `datetime` se convirtió a formato 
+`datetime64` con zona horaria UTC para garantizar consistencia temporal.
+
+**2. Conversión de valores:** La columna `valor` se forzó a tipo numérico, 
+convirtiendo a `NaN` cualquier entrada no convertible.
+
+**3. Filtrado de datos corruptos:** Se definieron rangos físicamente válidos 
+para cada variable y se eliminaron registros fuera de esos límites:
+
+| Variable | Rango válido | Unidad |
+|---|---|---|
+| CO | 0 – 100 | mg/m³ |
+| IUV | 0 – 20 | índice |
+| LLU | 0 – 60 | mm/h |
+| NO2 | 0 – 500 | µg/m³ |
+| O3 | 0 – 300 | µg/m³ |
+| PM10 | 0 – 1500 | µg/m³ |
+| PM2.5 | 0 – 1000 | µg/m³ |
+| RS | 0 – 1500 | W/m² |
+| SO2 | 0 – 800 | µg/m³ |
+| TMP | -5 – 35 | °C |
+
+**4. Incorporación de coordenadas geográficas:** Se añadieron latitud y longitud 
+para cada estación, permitiendo visualizaciones geoespaciales.
+
+## Dataset final
+
+El dataset limpio se exportó en formato **Parquet** para optimizar el rendimiento 
+de carga en las visualizaciones:
+
+- **Archivo:** `remmaq_clean.parquet`
+- **Columnas:** `datetime`, `estacion`, `valor`, `variable`, `latitud`, `longitud`
+- **Estaciones:** 13 puntos de monitoreo en el Distrito Metropolitano de Quito
+- **Variables:** 14 (contaminantes y meteorológicas)
+- **Período:** enero 2004 – diciembre 2025

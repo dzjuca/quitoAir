@@ -1,33 +1,40 @@
 ---
 title: "Calidad del Aire en Quito"
-subtitle: "Análisis histórico de la Red Metropolitana de Monitoreo Atmosférico (REMMAQ) 2004–2026"
-author: "Daniel"
+subtitle: "Quito respira — análisis visual de datos REMMAQ 2004–2025"
+author: "Daniel Z. Juca"
 date: today
 ---
 
 ## Contexto del problema
 
-Quito, capital del Ecuador, enfrenta desafíos significativos en materia de calidad del aire debido a su crecimiento urbano, el incremento del parque automotor y su particular topografía andina. La Red Metropolitana de Monitoreo Atmosférico (REMMAQ) registra desde 2004 datos horarios de contaminantes y variables meteorológicas en múltiples estaciones distribuidas a lo largo de la ciudad.
+Quito es una de las pocas ciudades del Ecuador con una red de monitoreo atmosférico 
+consolidada. Con más de 800.000 vehículos circulando diariamente y una topografía andina 
+que dificulta la dispersión de contaminantes, la calidad del aire de la capital ecuatoriana 
+es un tema de relevancia para la salud pública y la política ambiental.
 
 ## Motivación
 
-Comprender cómo ha evolucionado la calidad del aire en Quito durante más de dos décadas permite identificar tendencias, zonas críticas y la relación entre factores ambientales y niveles de contaminación — información clave para la toma de decisiones en salud pública y política ambiental.
+Explorar más de dos décadas de datos atmosféricos en Quito para identificar 
+patrones, tendencias y relaciones entre variables ambientales — con el objetivo de entender 
+qué nos dicen los datos sobre la calidad del aire que respiran los quiteños.
 
 ## Preguntas analíticas
 
-1. ¿Qué estaciones de monitoreo registran los niveles más altos de contaminación y cómo se distribuyen geográficamente?
-2. ¿Cómo han evolucionado los niveles de PM2.5 y NO2 en Quito entre 2004 y 2026?
-3. ¿Qué contaminante representa mayor riesgo para la salud según estándares OMS y dónde se supera el límite con mayor frecuencia?
-4. ¿Existe relación entre radiación solar/ultravioleta y los niveles de contaminantes atmosféricos?
+1. ¿Cómo se distribuye la red de monitoreo de calidad del aire en Quito y cuál es su cobertura?
+2. ¿Qué contaminante representa mayor riesgo para la salud y dónde se supera el límite con mayor frecuencia?
+3. ¿Cómo varía la concentración de PM2.5 según la dirección del viento en tres zonas de Quito?
+4. ¿Cómo influye la radiación solar en la formación de ozono troposférico y NO₂ en Quito?
 
 ## Dataset
 
-Los datos provienen de la REMMAQ e incluyen registros horarios de 10 variables ambientales:
+Los datos provienen de la REMMAQ e incluyen más de **15 millones de registros horarios** de 14 variables ambientales distribuidos en 13 estaciones de monitoreo:
 
 - **Contaminantes:** PM2.5, PM10, NO2, SO2, CO, O3
-- **Variables meteorológicas:** Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Lluvia (LLU)
-- **Período:** enero 2004 – febrero 2026
-- **Estaciones:** 13 puntos de monitoreo distribuidos en Quito
+- **Variables meteorológicas:** Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Precipitación (LLU), Dirección del viento (DIR), Velocidad del viento (VEL), Humedad relativa (HR), Presión barométrica (PB)
+- **Período:** enero 2004 – diciembre 2025
+- **Estaciones:** 13 puntos de monitoreo distribuidos en el Distrito Metropolitano de Quito
+
+Los datos están disponibles públicamente en el portal de la Secretaría de Ambiente del Municipio de Quito: [datosambiente.quito.gob.ec](https://datosambiente.quito.gob.ec)
 
 ## Estructura del proyecto
 
