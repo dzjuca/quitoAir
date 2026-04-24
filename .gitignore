@@ -12,7 +12,7 @@ venv/
 p_m5/
 
 # Data
-data/
+# data/
 *.parquet
 *.csv
 *.xlsx
@@ -20,3 +20,4 @@ data/
 # OS
 .DS_Store
 Thumbs.db
+**/*.quarto_ipynb
