@@ -1,0 +1,601 @@
+---
+title: "Visualizaciones"
+author: "Daniel Z. Juca"
+date: today
+---
+
+## Pregunta 1: ¿Cómo se distribuye la red de monitoreo de calidad del aire en Quito y cuál es su cobertura?
+
+La Red Metropolitana de Monitoreo Atmosférico de Quito (REMMAQ) está compuesta por **13 estaciones** distribuidas a lo largo del Distrito Metropolitano, cubriendo los principales corredores urbanos del norte, centro y sur de la ciudad, así como los valles orientales. Las estaciones registran hasta **14 variables** ambientales: material particulado fino (**PM2.5**) y grueso (**PM10**), dióxido de nitrógeno (**NO2**), dióxido de azufre (**SO2**), monóxido de carbono (**CO**), ozono troposférico (**O3**), radiación solar (**RS**), índice ultravioleta (**IUV**), temperatura (**TMP**), precipitación (**LLU**), velocidad del viento (**VV**), dirección del viento (**DV**), presión barométrica (**PB**) y humedad relativa (**HR**).
+
+No todas las estaciones operan con la misma continuidad ni miden el mismo conjunto de variables. El mapa a continuación permite explorar cada estación, su período de operación y los promedios históricos registrados.
+
+```{python}
+import pandas as pd
+import plotly.graph_objects as go
+
+# Cargar dataset
+df = pd.read_parquet("data/remmaq_clean.parquet")
+
+# Promedios históricos por estación y variable
+promedios_todos = (
+    df.groupby(['estacion', 'variable'], as_index=False)['valor']
+    .mean()
+    .pivot_table(index='estacion', columns='variable', values='valor')
+    .reset_index()
+)
+
+# Coordenadas por estación
+coords = df[['estacion', 'latitud', 'longitud']].drop_duplicates()
+
+# Clasificación por cobertura
+categoria_color = {
+    "Belisario":   {"categoria": "Cobertura completa",  "color": "#2980b9"},
+    "Carapungo":   {"categoria": "Cobertura completa",  "color": "#2980b9"},
+    "Centro":      {"categoria": "Cobertura completa",  "color": "#2980b9"},
+    "Cotocollao":  {"categoria": "Cobertura completa",  "color": "#2980b9"},
+    "El Camal":    {"categoria": "Cobertura completa",  "color": "#2980b9"},
+    "Guamani":     {"categoria": "Cobertura completa",  "color": "#2980b9"},
+    "Los Chillos": {"categoria": "Cobertura completa",  "color": "#2980b9"},
+    "Tumbaco":     {"categoria": "Cobertura completa",  "color": "#2980b9"},
+    "Jipijapa":    {"categoria": "Cobertura parcial",   "color": "#f39c12"},
+    "San Antonio": {"categoria": "Cobertura parcial",   "color": "#f39c12"},
+    "Chillogallo": {"categoria": "Cobertura limitada",  "color": "#e74c3c"},
+    "Condado":     {"categoria": "Cobertura limitada",  "color": "#e74c3c"},
+    "Turubamba":   {"categoria": "Cobertura limitada",  "color": "#e74c3c"},
+}
+
+# Períodos por estación
+periodos = {
+    "Belisario": "2004–2025", "Carapungo": "2004–2025",
+    "Centro": "2004–2025", "Chillogallo": "2004 (limitado)",
+    "Condado": "2004–2005 (limitado)", "Cotocollao": "2004–2025",
+    "El Camal": "2004–2025", "Guamani": "2005–2025",
+    "Jipijapa": "2018–2025", "Los Chillos": "2004–2025",
+    "San Antonio": "2017–2025", "Tumbaco": "2004–2025",
+    "Turubamba": "2004–2005 (limitado)"
+}
+
+# Unidades
+unidades = {
+    "CO": "mg/m³", "IUV": "índice", "LLU": "mm",
+    "NO2": "µg/m³", "O3": "µg/m³", "PM10": "µg/m³",
+    "PM2.5": "µg/m³", "RS": "W/m²", "SO2": "µg/m³", "TMP": "°C"
+}
+
+orden_vars = ["PM2.5", "PM10", "NO2", "O3", "SO2", "CO", "TMP", "RS", "IUV", "LLU"]
+
+# Construir trazas por categoría
+trazas = {}
+
+merged = coords.merge(promedios_todos, on='estacion', how='left')
+
+for _, row in merged.iterrows():
+    est = row['estacion']
+    info = categoria_color.get(est, {"categoria": "Cobertura completa", "color": "#2980b9"})
+    cat = info["categoria"]
+    color = info["color"]
+
+    # Texto del hover
+    hover = f"<b>{est}</b><br>Período: {periodos.get(est, 'N/D')}<br><br><b>Promedio histórico</b><br>"
+    for var in orden_vars:
+        if var in row and pd.notna(row[var]):
+            hover += f"{var}: {row[var]:.2f} {unidades[var]}<br>"
+
+    if cat not in trazas:
+        trazas[cat] = {"lats": [], "lons": [], "texts": [], "color": color}
+
+    trazas[cat]["lats"].append(row["latitud"])
+    trazas[cat]["lons"].append(row["longitud"])
+    trazas[cat]["texts"].append(hover)
+
+# Figura
+fig = go.Figure()
+
+for cat, datos in trazas.items():
+    fig.add_trace(go.Scattermap(
+        lat=datos["lats"],
+        lon=datos["lons"],
+        mode="markers",
+        marker=dict(size=14, color=datos["color"]),
+        hovertemplate="%{text}<extra></extra>",
+        text=datos["texts"],
+        name=cat
+    ))
+
+fig.update_layout(
+    map=dict(
+        style="open-street-map",
+        center=dict(lat=-0.18, lon=-78.51),
+        zoom=10
+    ),
+    title="Red REMMAQ — Estaciones de monitoreo de calidad del aire en Quito",
+    # legend=dict(title="Cobertura de medición"),
+    legend=dict(
+        title="Cobertura de medición",
+        x=0.01,
+        y=0.99,
+        xanchor="left",
+        yanchor="top",
+        bgcolor="white",
+        bordercolor="lightgray",
+        borderwidth=1
+    ),
+    height=600,
+    margin=dict(r=0, t=40, l=0, b=0)
+)
+
+fig.show()
+
+```
+
+## Pregunta 2: ¿Qué contaminante representa mayor riesgo para la salud y dónde se supera el límite con mayor frecuencia?
+
+El análisis compara las concentraciones promedio anuales de PM2.5, PM10 y NO2 frente a dos marcos normativos: las Guías de Calidad del Aire de la OMS 2021 y el Acuerdo Ministerial 097-A de Ecuador (2015). La diferencia entre ambos estándares revela no solo el estado real de la calidad del aire en Quito, sino también la brecha entre la normativa nacional vigente y los umbrales recomendados internacionalmente para la protección de la salud pública.
+
+**Bajo las guías de la OMS 2021**, los límites anuales son considerablemente más estrictos (PM2.5: **5 µg/m³**, PM10: **15 µg/m³**, NO2: **10 µg/m³**). La mayor parte de las estaciones de monitoreo de Quito superan estos umbrales de forma persistente, siendo PM2.5 y NO2 los contaminantes de mayor riesgo crónico para la salud de la población.
+
+```{python}
+import altair as alt
+import pandas as pd
+
+# Cargar dataset
+df = pd.read_parquet("data/remmaq_clean.parquet")
+
+# Límites anuales OMS 2021
+limites_anuales = {
+    "PM2.5": 5,
+    "PM10": 15,
+    "NO2": 10
+}
+
+orden_contaminantes = ["PM2.5", "PM10", "NO2"]
+
+orden_ns = [
+    "San Antonio", "Carapungo", "Condado", "Cotocollao", "Jipijapa",
+    "Belisario", "Tumbaco", "Centro", "El Camal", "Chillogallo",
+    "Los Chillos", "Guamani", "Turubamba"
+]
+
+# Promedio anual por estación y contaminante (excluir 2026)
+df_anual = (
+    df[df["variable"].isin(limites_anuales.keys()) & (df["datetime"].dt.year < 2026)]
+    .copy()
+)
+df_anual["año"] = df_anual["datetime"].dt.year
+df_anual = (
+    df_anual.groupby(["año", "estacion", "variable"])["valor"]
+    .mean()
+    .reset_index()
+)
+df_anual["limite_oms"] = df_anual["variable"].map(limites_anuales)
+df_anual["diff_oms"] = df_anual["valor"] - df_anual["limite_oms"]
+
+# Heatmap
+alt.Chart(df_anual).mark_rect().encode(
+    x=alt.X("año:O", title="Año"),
+    y=alt.Y("estacion:N", title="Sur → Norte", sort=orden_ns),
+    color=alt.Color("diff_oms:Q",
+                    title="Diferencia vs límite OMS (µg/m³)",
+                    scale=alt.Scale(
+                        scheme="redblue",
+                        reverse=True,
+                        domainMid=0,
+                        domain=[-20, 20]
+                    )),
+    tooltip=[
+        alt.Tooltip("año:O", title="Año"),
+        alt.Tooltip("estacion:N", title="Estación"),
+        alt.Tooltip("variable:N", title="Contaminante"),
+        alt.Tooltip("valor:Q", title="Concentración (µg/m³)", format=".1f"),
+        alt.Tooltip("limite_oms:Q", title="Límite anual OMS (µg/m³)"),
+        alt.Tooltip("diff_oms:Q", title="Diferencia vs OMS (µg/m³)", format=".1f")
+    ]
+).facet(
+    facet=alt.Facet("variable:N", sort=orden_contaminantes, title="Contaminante"),
+    columns=1
+).resolve_scale(
+    color="independent"
+).properties(
+    title="Exposición crónica — Promedio anual vs límite anual OMS 2021 (rojo = supera, azul = bajo el límite)"
+)
+```
+
+Frente a la **normativa nacional vigente** (AM 097-A, límites: PM2.5: 15 µg/m³, PM10: 50 µg/m³, NO2: 40 µg/m³), el panorama cambia sustancialmente. La mayoría de estaciones se mantienen dentro de los límites legales ecuatorianos, lo que evidencia una brecha significativa entre el estándar nacional y las recomendaciones internacionales de la OMS.
+
+```{python}
+import altair as alt
+import pandas as pd
+
+# Límites anuales Ecuador Acuerdo Ministerial 097-A (2015)
+limites_ecuador = {
+    "PM2.5": 15,
+    "PM10":  50,
+    "NO2":   40
+}
+
+orden_contaminantes = ["PM2.5", "PM10", "NO2"]
+
+orden_ns = [
+    "San Antonio", "Carapungo", "Condado", "Cotocollao", "Jipijapa",
+    "Belisario", "Tumbaco", "Centro", "El Camal", "Chillogallo",
+    "Los Chillos", "Guamani", "Turubamba"
+]
+
+# Promedio anual por estación y contaminante (excluir 2026)
+df_ecuador = (
+    df[df["variable"].isin(limites_ecuador.keys()) & (df["datetime"].dt.year < 2026)]
+    .copy()
+)
+df_ecuador["año"] = df_ecuador["datetime"].dt.year
+df_ecuador = (
+    df_ecuador.groupby(["año", "estacion", "variable"])["valor"]
+    .mean()
+    .reset_index()
+)
+df_ecuador["limite"] = df_ecuador["variable"].map(limites_ecuador)
+df_ecuador["diff"] = df_ecuador["valor"] - df_ecuador["limite"]
+
+# Heatmap
+alt.Chart(df_ecuador).mark_rect().encode(
+    x=alt.X("año:O", title="Año"),
+    y=alt.Y("estacion:N", title="Sur → Norte", sort=orden_ns),
+    color=alt.Color("diff:Q",
+                    title="Diferencia vs límite Ecuador (µg/m³)",
+                    scale=alt.Scale(
+                        scheme="redblue",
+                        reverse=True,
+                        domainMid=0
+                    )),
+    tooltip=[
+        alt.Tooltip("año:O", title="Año"),
+        alt.Tooltip("estacion:N", title="Estación"),
+        alt.Tooltip("variable:N", title="Contaminante"),
+        alt.Tooltip("valor:Q", title="Concentración (µg/m³)", format=".1f"),
+        alt.Tooltip("limite:Q", title="Límite Ecuador AM 097-A (µg/m³)"),
+        alt.Tooltip("diff:Q", title="Diferencia vs límite (µg/m³)", format=".1f")
+    ]
+).facet(
+    facet=alt.Facet("variable:N", sort=orden_contaminantes, title="Contaminante"),
+    columns=1
+).resolve_scale(
+    color="independent"
+).properties(
+    title="Superación del límite Ecuador AM 097-A por estación y año (rojo = supera, azul = bajo el límite)"
+)
+```
+## Pregunta 3: ¿Cómo varía la concentración de PM2.5 según la dirección del viento en tres zonas de Quito?
+
+Se analizan tres estaciones representativas del eje norte-sur de Quito — Carapungo, Belisario y Guamani — para identificar qué direcciones del viento están asociadas a los episodios más críticos de PM2.5. Cada rosa de vientos muestra la frecuencia horaria por dirección (radio) y la concentración de PM2.5 en el percentil 95 (color), permitiendo distinguir las direcciones de mayor riesgo en cada zona de la ciudad.
+
+```{python}
+#| fig-align: center
+import plotly.express as px
+import pandas as pd
+
+# Coordenadas de las 3 estaciones
+estaciones_coords = pd.DataFrame({
+    "estacion": ["Carapungo", "Belisario", "Guamani"],
+    "zona": ["Carapungo - Norte", "Belisario - Centro", "Guamani - Sur"],
+    "lat": [-0.0927, -0.1807, -0.3372],
+    "lon": [-78.4445, -78.4678, -78.5506]
+})
+
+fig = px.scatter_map(
+    estaciones_coords,
+    lat="lat",
+    lon="lon",
+    hover_name="estacion",
+    hover_data={"zona": True, "lat": False, "lon": False},
+    color="zona",
+    color_discrete_map={
+        "Carapungo - Norte": "#e74c3c",
+        "Belisario - Centro": "#e67e22",
+        "Guamani - Sur": "#8e44ad"
+    },
+    size_max=100,
+    size=[100, 100, 100],
+    zoom=10.0,
+    center={"lat": -0.23, "lon": -78.51},
+    map_style="open-street-map",
+    title=""
+)
+
+fig.update_traces(marker=dict(size=16))
+fig.update_layout(
+    height=500,
+    legend_title="Zona",
+    margin=dict(l=0, r=0, t=10, b=0),
+    legend=dict(
+        yanchor="top",
+        y=0.99,
+        xanchor="left",
+        x=0.01
+    )
+)
+
+fig.show()
+```
+<br>
+
+**Carapungo (Norte)** presenta un patrón direccional donde los vientos más frecuentes provienen del noroeste, sin embargo las mayores concentraciones de PM2.5 — evidenciadas por el color rojo intenso — están asociadas a vientos provenientes del sureste y este-sureste, sugiriendo la influencia de fuentes de emisión localizadas en el centro y sur de la ciudad.
+
+```{python}
+#| fig-align: center
+import plotly.graph_objects as go
+import pandas as pd
+
+df_rosa = pd.read_parquet("data/remmaq_rosa.parquet")
+
+import numpy as np
+bins = [0, 10, 15, 20, 30, 50]
+labels_sector = [
+    "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
+    "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"
+]
+
+datos = df_rosa[df_rosa["estacion"] == "Carapungo"].copy()
+datos["sector"] = pd.cut(
+    datos["direccion"],
+    bins=np.arange(0, 361, 22.5),
+    labels=labels_sector,
+    include_lowest=True
+)
+
+df_agg = (
+    datos.groupby("sector", observed=True)
+    .agg(pm25_p95=("pm25", lambda x: x.quantile(0.95)),
+         frecuencia=("pm25", "count"))
+    .reset_index()
+)
+
+fig = go.Figure(go.Barpolar(
+    r=df_agg["frecuencia"],
+    theta=df_agg["sector"],
+    marker=dict(
+        color=df_agg["pm25_p95"],
+        colorscale="Reds",
+        cmin=0,
+        cmax=60,
+        showscale=True,
+        colorbar=dict(title="PM2.5 p95<br>(µg/m³)")
+    ),
+    hovertemplate=(
+        "<b>%{theta}</b><br>"
+        "Frecuencia: %{r} horas<br>"
+        "PM2.5 p95: %{marker.color:.1f} µg/m³<extra></extra>"
+    )
+))
+
+fig.update_layout(
+    # title="Rosa de vientos — Carapungo (Norte)",
+    # polar=dict(angularaxis=dict(rotation=90, direction="clockwise")),
+    polar=dict(
+    angularaxis=dict(rotation=90, direction="clockwise"),
+    radialaxis=dict(ticksuffix=" h")
+    ),
+    height=500
+)
+
+fig.show()
+```
+
+<br>
+En **Belisario (Centro)**, los vientos predominantes provienen del sector sur hasta el este, abarcando las direcciones SSE, SE, ESE y E. Este mismo abanico direccional coincide con las mayores concentraciones de PM2.5 — lo que lo distingue de las otras estaciones — sugiriendo que las principales fuentes de contaminación que afectan al centro de Quito se ubican al sur y sureste de esta estación.
+
+```{python}
+#| fig-align: center
+import plotly.graph_objects as go
+import pandas as pd
+import numpy as np
+
+datos = df_rosa[df_rosa["estacion"] == "Belisario"].copy()
+datos["sector"] = pd.cut(
+    datos["direccion"],
+    bins=np.arange(0, 361, 22.5),
+    labels=labels_sector,
+    include_lowest=True
+)
+
+df_agg = (
+    datos.groupby("sector", observed=True)
+    .agg(pm25_p95=("pm25", lambda x: x.quantile(0.95)),
+         frecuencia=("pm25", "count"))
+    .reset_index()
+)
+
+fig = go.Figure(go.Barpolar(
+    r=df_agg["frecuencia"],
+    theta=df_agg["sector"],
+    marker=dict(
+        color=df_agg["pm25_p95"],
+        colorscale="Reds",
+        cmin=0,
+        cmax=60,
+        showscale=True,
+        colorbar=dict(title="PM2.5 p95<br>(µg/m³)")
+    ),
+    hovertemplate=(
+        "<b>%{theta}</b><br>"
+        "Frecuencia: %{r}<br>"
+        "PM2.5 p95: %{marker.color:.1f} µg/m³<extra></extra>"
+    )
+))
+
+fig.update_layout(
+    polar=dict(
+        angularaxis=dict(rotation=90, direction="clockwise"),
+        radialaxis=dict(ticksuffix=" h")
+    ),
+    height=500
+)
+
+fig.show()
+```
+
+<br> 
+
+En **Guamani (Sur)**, los vientos más frecuentes provienen del sur y sur-sureste, sin embargo no son los que transportan las mayores concentraciones de PM2.5. Las direcciones oeste y noroeste, aunque poco frecuentes, registran los valores más críticos de PM2.5 superando los 45 µg/m³ en el percentil 95, sugiriendo la presencia de fuentes de emisión puntuales e intensas ubicadas al oeste de esta estación.
+
+```{python}
+#| fig-align: center
+
+datos = df_rosa[df_rosa["estacion"] == "Guamani"].copy()
+datos["sector"] = pd.cut(
+    datos["direccion"],
+    bins=np.arange(0, 361, 22.5),
+    labels=labels_sector,
+    include_lowest=True
+)
+
+df_agg = (
+    datos.groupby("sector", observed=True)
+    .agg(pm25_p95=("pm25", lambda x: x.quantile(0.95)),
+         frecuencia=("pm25", "count"))
+    .reset_index()
+)
+
+fig = go.Figure(go.Barpolar(
+    r=df_agg["frecuencia"],
+    theta=df_agg["sector"],
+    marker=dict(
+        color=df_agg["pm25_p95"],
+        colorscale="Reds",
+        cmin=0,
+        cmax=60,
+        showscale=True,
+        colorbar=dict(title="PM2.5 p95<br>(µg/m³)")
+    ),
+    hovertemplate=(
+        "<b>%{theta}</b><br>"
+        "Frecuencia: %{r}<br>"
+        "PM2.5 p95: %{marker.color:.1f} µg/m³<extra></extra>"
+    )
+))
+
+fig.update_layout(
+    polar=dict(
+        angularaxis=dict(rotation=90, direction="clockwise"),
+        radialaxis=dict(ticksuffix=" h")
+    ),
+    height=500
+)
+
+fig.show()
+```
+<br>
+
+## Pregunta 4: ¿Cómo influye la radiación solar en la formación de ozono troposférico y NO₂ en Quito?
+
+La radiación solar actúa como catalizador fotoquímico: a mayor intensidad solar, mayor 
+producción de O₃ troposférico y menor concentración de NO₂, siguiendo el ciclo fotolítico 
+del dióxido de nitrógeno.
+
+**Mecanismo :**
+
+$$
+\text{NO}_2 + \text{UV} \rightarrow \text{NO} + \text{O}
+$$
+
+$$
+\text{O} + \text{O}_2 \rightarrow \text{O}_3
+$$
+
+$$
+\text{COVs} + \text{NO} \rightarrow \text{productos} \quad \text{(NO queda atrapado)}
+$$
+
+$$
+\text{O}_3 \not\rightarrow \text{destrucción} \quad \Rightarrow \quad \text{O}_3 \text{ se acumula}
+$$
+
+**Radiación Solar vs O₃**
+
+```{python}
+import pandas as pd
+import numpy as np
+import altair as alt
+
+# Cargar datos agregados
+df_o3_plot = pd.read_parquet("data/q4_rs_o3.parquet")
+
+# Regresión lineal
+m_o3, b_o3 = np.polyfit(df_o3_plot['RS'], df_o3_plot['valor_contaminante'], 1)
+x_line = np.linspace(df_o3_plot['RS'].min(), df_o3_plot['RS'].max(), 100)
+df_tend_o3 = pd.DataFrame({'RS': x_line, 'valor_contaminante': m_o3 * x_line + b_o3})
+
+# Scatter
+puntos_o3 = alt.Chart(df_o3_plot).mark_circle(size=80, opacity=0.7).encode(
+    x=alt.X('RS:Q', title='Radiación Solar promedio (W/m²)'),
+    y=alt.Y('valor_contaminante:Q', title='O₃ promedio (µg/m³)'),
+    color=alt.Color('hora:Q',
+        title='Hora del día',
+        scale=alt.Scale(
+            domain=[0, 6, 12, 18, 23],
+            range=['#0d0d2b', '#f4a300', '#ffe033', '#f4a300', '#0d0d2b']
+        )
+    ),
+    tooltip=['estacion:N', 'hora:Q',
+             alt.Tooltip('RS:Q', format='.1f'),
+             alt.Tooltip('valor_contaminante:Q', format='.1f')]
+)
+
+linea_o3 = alt.Chart(df_tend_o3).mark_line(
+    color='red', strokeDash=[5,3], strokeWidth=2
+).encode(x='RS:Q', y='valor_contaminante:Q')
+
+(puntos_o3 + linea_o3).properties(
+    width="container",
+    height=400,
+    title='Radiación Solar vs O₃ en Quito | R² = 0.83 | promedio por hora y estación'
+)
+```
+
+La correlación positiva (R²=0.83) confirma que la radiación solar es el principal 
+impulsor de la formación de ozono troposférico en Quito. Los puntos amarillos 
+(mediodía) concentran los valores más altos de RS y O₃, mientras que los puntos 
+oscuros (madrugada) muestran RS≈0 con O₃ mínimo.
+
+**Radiación Solar vs NO₂**
+
+```{python}
+# Cargar datos agregados
+df_no2_plot = pd.read_parquet("data/q4_rs_no2.parquet")
+
+# Regresión lineal
+m_no2, b_no2 = np.polyfit(df_no2_plot['RS'], df_no2_plot['valor_contaminante'], 1)
+x_line = np.linspace(df_no2_plot['RS'].min(), df_no2_plot['RS'].max(), 100)
+df_tend_no2 = pd.DataFrame({'RS': x_line, 'valor_contaminante': m_no2 * x_line + b_no2})
+
+# Scatter
+puntos_no2 = alt.Chart(df_no2_plot).mark_circle(size=80, opacity=0.7).encode(
+    x=alt.X('RS:Q', title='Radiación Solar promedio (W/m²)'),
+    y=alt.Y('valor_contaminante:Q', title='NO₂ promedio (µg/m³)'),
+    color=alt.Color('hora:Q',
+        title='Hora del día',
+        scale=alt.Scale(
+            domain=[0, 6, 12, 18, 23],
+            range=['#0d0d2b', '#f4a300', '#ffe033', '#f4a300', '#0d0d2b']
+        )
+    ),
+    tooltip=['estacion:N', 'hora:Q',
+             alt.Tooltip('RS:Q', format='.1f'),
+             alt.Tooltip('valor_contaminante:Q', format='.1f')]
+)
+
+linea_no2 = alt.Chart(df_tend_no2).mark_line(
+    color='red', strokeDash=[5,3], strokeWidth=2
+).encode(x='RS:Q', y='valor_contaminante:Q')
+
+(puntos_no2 + linea_no2).properties(
+    width="container",
+    height=400,
+    title='Radiación Solar vs NO₂ en Quito | R² = 0.12 | promedio por hora y estación'
+)
+```
+
+La correlación negativa débil (R²=0.12) es consistente con la teoría: la luz UV 
+descompone el NO₂ para iniciar el ciclo fotoquímico. Sin embargo, la dispersión 
+alta indica que otros factores — tráfico, hora pico, geografía — también influyen 
+significativamente en los niveles de NO₂.
+

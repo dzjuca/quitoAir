@@ -1,0 +1,35 @@
+---
+title: "Calidad del Aire en Quito"
+subtitle: "Análisis histórico de la Red Metropolitana de Monitoreo Atmosférico (REMMAQ) 2004–2026"
+author: "Daniel"
+date: today
+---
+
+## Contexto del problema
+
+Quito, capital del Ecuador, enfrenta desafíos significativos en materia de calidad del aire debido a su crecimiento urbano, el incremento del parque automotor y su particular topografía andina. La Red Metropolitana de Monitoreo Atmosférico (REMMAQ) registra desde 2004 datos horarios de contaminantes y variables meteorológicas en múltiples estaciones distribuidas a lo largo de la ciudad.
+
+## Motivación
+
+Comprender cómo ha evolucionado la calidad del aire en Quito durante más de dos décadas permite identificar tendencias, zonas críticas y la relación entre factores ambientales y niveles de contaminación — información clave para la toma de decisiones en salud pública y política ambiental.
+
+## Preguntas analíticas
+
+1. ¿Qué estaciones de monitoreo registran los niveles más altos de contaminación y cómo se distribuyen geográficamente?
+2. ¿Cómo han evolucionado los niveles de PM2.5 y NO2 en Quito entre 2004 y 2026?
+3. ¿Qué contaminante representa mayor riesgo para la salud según estándares OMS y dónde se supera el límite con mayor frecuencia?
+4. ¿Existe relación entre radiación solar/ultravioleta y los niveles de contaminantes atmosféricos?
+
+## Dataset
+
+Los datos provienen de la REMMAQ e incluyen registros horarios de 10 variables ambientales:
+
+- **Contaminantes:** PM2.5, PM10, NO2, SO2, CO, O3
+- **Variables meteorológicas:** Radiación Solar (RS), Índice UV (IUV), Temperatura (TMP), Lluvia (LLU)
+- **Período:** enero 2004 – febrero 2026
+- **Estaciones:** 13 puntos de monitoreo distribuidos en Quito
+
+## Estructura del proyecto
+
+- [Limpieza de Datos](data_cleaning.qmd) — proceso de preparación y transformación del dataset
+- [Visualizaciones](visualizations.qmd) — análisis visual para responder las preguntas analíticas

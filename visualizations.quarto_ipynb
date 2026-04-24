@@ -1,0 +1,41 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Visualizaciones\"\n",
+        "author: \"Daniel\"\n",
+        "date: today\n",
+        "---\n",
+        "\n",
+        "## En construcción\n",
+        "\n",
+        "Próximamente las visualizaciones del análisis."
+      ],
+      "id": "f9d8247d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import sys\n",
+        "print(sys.executable)"
+      ],
+      "id": "8060e73a",
+      "execution_count": null,
+      "outputs": []
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "p_m5",
+      "language": "python",
+      "display_name": "p_m5",
+      "path": "/Users/dzjuca/Downloads/[M] DataS/[5] Visualizacion Analitica/dev/p_m5/.venv/share/jupyter/kernels/p_m5"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

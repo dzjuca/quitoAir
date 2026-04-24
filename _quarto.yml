@@ -1,0 +1,24 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "Calidad del Aire en Quito"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Inicio
+      - href: data_cleaning.qmd
+        text: Limpieza de Datos
+      - href: visualizations.qmd
+        text: Visualizaciones
+
+# jupyter: p_m5
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-fold: true
+    code-tools: true
+    fig-width: 8

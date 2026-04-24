@@ -1,0 +1,22 @@
+# Quarto
+/.quarto/
+/_site/
+*.ipynb
+
+# Python
+__pycache__/
+*.py[cod]
+.env
+.venv/
+venv/
+p_m5/
+
+# Data
+data/
+*.parquet
+*.csv
+*.xlsx
+
+# OS
+.DS_Store
+Thumbs.db
