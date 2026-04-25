@@ -494,19 +494,20 @@ del dióxido de nitrógeno.
 **Mecanismo :**
 
 $$
-\text{NO}_2 + \text{UV} \rightarrow \text{NO} + \text{O}
+\color{green}{\text{NO}_2 + \text{UV} \rightarrow \text{NO} + \text{O} + \text{O}_2 \rightarrow \text{O}_3}
 $$
 
 $$
-\text{O} + \text{O}_2 \rightarrow \text{O}_3
+\color{green}{\text{O}_3 + \text{NO} \rightarrow \text{NO}_2 + \text{O}_2 \quad \circlearrowleft}
+$$
+
+
+$$
+\color{red}{\text{COVs}} + \text{NO} \rightarrow \text{productos} \quad \text{(NO queda atrapado)}
 $$
 
 $$
-\text{COVs} + \text{NO} \rightarrow \text{productos} \quad \text{(NO queda atrapado)}
-$$
-
-$$
-\text{O}_3 \not\rightarrow \text{destrucción} \quad \Rightarrow \quad \text{O}_3 \text{ se acumula}
+\text{O}_3 \not\rightarrow \text{destrucción} \quad \Rightarrow \quad \color{blue}{\text{O}_3 \text{ se acumula}}
 $$
 
 **Radiación Solar vs O₃**
@@ -556,46 +557,85 @@ impulsor de la formación de ozono troposférico en Quito. Los puntos amarillos
 (mediodía) concentran los valores más altos de RS y O₃, mientras que los puntos 
 oscuros (madrugada) muestran RS≈0 con O₃ mínimo.
 
-**Radiación Solar vs NO₂**
+
+**Ciclo diario: RS, O₃, NO₂ y Temperatura**
 
 ```{python}
-# Cargar datos agregados
-df_no2_plot = pd.read_parquet("data/q4_rs_no2.parquet")
+#| echo: false
+df_perfil_tidy = pd.read_parquet("data/q4_perfil_diario.parquet")
+df_tmp         = pd.read_parquet("data/q4_tmp_hora.parquet")
 
-# Regresión lineal
-m_no2, b_no2 = np.polyfit(df_no2_plot['RS'], df_no2_plot['valor_contaminante'], 1)
-x_line = np.linspace(df_no2_plot['RS'].min(), df_no2_plot['RS'].max(), 100)
-df_tend_no2 = pd.DataFrame({'RS': x_line, 'valor_contaminante': m_no2 * x_line + b_no2})
+df_norm = df_perfil_tidy[df_perfil_tidy['variable'].isin(['RS', 'O3', 'NO2'])].copy()
+df_norm['variable'] = df_norm['variable'].map({
+    'RS':  'RS (W/m²)',
+    'O3':  'O₃ (µg/m³)',
+    'NO2': 'NO₂ (µg/m³)'
+})
 
-# Scatter
-puntos_no2 = alt.Chart(df_no2_plot).mark_circle(size=80, opacity=0.7).encode(
-    x=alt.X('RS:Q', title='Radiación Solar promedio (W/m²)'),
-    y=alt.Y('valor_contaminante:Q', title='NO₂ promedio (µg/m³)'),
-    color=alt.Color('hora:Q',
-        title='Hora del día',
-        scale=alt.Scale(
-            domain=[0, 6, 12, 18, 23],
-            range=['#0d0d2b', '#f4a300', '#ffe033', '#f4a300', '#0d0d2b']
-        )
-    ),
-    tooltip=['estacion:N', 'hora:Q',
-             alt.Tooltip('RS:Q', format='.1f'),
-             alt.Tooltip('valor_contaminante:Q', format='.1f')]
+df_tmp_plot = df_tmp.copy()
+
+dominios_vars = ['RS (W/m²)', 'O₃ (µg/m³)', 'NO₂ (µg/m³)']
+colores_vars  = ['#f4a300', '#1a7abf', '#e03131']
+formas_vars   = ['circle', 'square', 'triangle-up']
+dominio_tmp   = ['TMP (°C)']
+color_tmp     = ['#2ca02c']
+
+leyenda_vars = alt.Legend(
+    orient='top-left', title=None,
+    fillColor='white', strokeColor='gray', padding=8
+)
+leyenda_clima = alt.Legend(
+    orient='top-right', title=None,
+    fillColor='white', strokeColor='gray', padding=8
 )
 
-linea_no2 = alt.Chart(df_tend_no2).mark_line(
-    color='red', strokeDash=[5,3], strokeWidth=2
-).encode(x='RS:Q', y='valor_contaminante:Q')
+base_vars = alt.Chart(df_norm).encode(
+    x=alt.X('hora:Q', title='Hora del día',
+            scale=alt.Scale(domain=[0, 23], nice=False),
+            axis=alt.Axis(values=list(range(0, 24, 2)))),
+    y=alt.Y('valor:Q', title='Valor normalizado (0–1)', scale=alt.Scale(domain=[0, 1])),
+    color=alt.Color('variable:N',
+                    scale=alt.Scale(domain=dominios_vars, range=colores_vars),
+                    legend=leyenda_vars),
+    shape=alt.Shape('variable:N',
+                    scale=alt.Scale(domain=dominios_vars, range=formas_vars),
+                    legend=leyenda_vars),
+    tooltip=['hora:Q', 'variable:N', alt.Tooltip('valor:Q', format='.2f')]
+)
 
-(puntos_no2 + linea_no2).properties(
+layer_contaminantes = base_vars.mark_line(strokeWidth=1.5, interpolate='monotone') + \
+                      base_vars.mark_point(size=120, filled=True)
+
+linea_tmp = alt.Chart(df_tmp_plot).mark_line(
+    strokeWidth=4, interpolate='monotone'
+).encode(
+    x='hora:Q',
+    y=alt.Y('valor:Q', title='Temperatura (°C)', scale=alt.Scale(domain=[0, 26])),
+    color=alt.Color('variable:N',
+                    scale=alt.Scale(domain=dominio_tmp, range=color_tmp),
+                    legend=leyenda_clima)
+)
+
+alt.layer(layer_contaminantes, linea_tmp).resolve_scale(
+    y='independent',
+    color='independent',
+    shape='independent'
+).properties(
     width="container",
     height=400,
-    title='Radiación Solar vs NO₂ en Quito | R² = 0.12 | promedio por hora y estación'
-)
+    title='Ciclo diario de RS, O₃, NO₂ y Temperatura en Quito'
+).interactive()
 ```
 
-La correlación negativa débil (R²=0.12) es consistente con la teoría: la luz UV 
-descompone el NO₂ para iniciar el ciclo fotoquímico. Sin embargo, la dispersión 
-alta indica que otros factores — tráfico, hora pico, geografía — también influyen 
-significativamente en los niveles de NO₂.
+El ciclo diario revela el mecanismo fotoquímico en acción: la radiación solar (RS) sube desde las 6h y alcanza su pico a las 11h, el O₃ la sigue con ~1 hora de retraso, mientras el NO₂ cae en las horas de mayor radiación. La temperatura muestra un retraso térmico adicional de ~2 horas respecto al pico solar. El segundo pico de NO₂ en horas 18-19 corresponde al tráfico vehicular de la tarde.
 
+## Conclusiones
+
+Quito supera sistemáticamente los límites de la OMS para PM2.5 y NO₂ en la mayoría 
+de estaciones, evidenciando una brecha crítica entre la normativa nacional vigente y 
+los estándares internacionales de salud pública.
+
+La radiación solar es el principal motor fotoquímico de la atmósfera quiteña: 
+transforma el NO₂ del tráfico en ozono troposférico (R²=0.83), exponiendo a la 
+población a dos riesgos distintos — NO₂ en horas pico y O₃ en horas de mayor 
+actividad al aire libre.

@@ -34,17 +34,13 @@ Cada observación ocupa una única fila:
 | 2004-01-01 02:00 | Belisario | PM2.5 | 11.8 |
 
 ```python
-# Montar Google Drive
-from google.colab import drive
-drive.mount('/content/drive')
-
 import pandas as pd
 import numpy as np
 import os
 import glob
 
 # Leer todos los archivos y construir DataFrame en formato largo
-ruta = '/content/drive/MyDrive/proyectoM5/data'
+ruta = '.../data'
 archivos = glob.glob(os.path.join(ruta, '*.xlsx'))
 
 dfs = []
